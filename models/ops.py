@@ -184,6 +184,7 @@ class MixedOp(nn.Module):
     """ Mixed operation """
     def __init__(self, C, stride):
         super().__init__()
+        self.bn = nn.BatchNorm2d(C)
         self._ops = nn.ModuleList()
         for primitive in gt.PRIMITIVES:
             op = OPS[primitive](C, stride, affine=False)
@@ -195,4 +196,4 @@ class MixedOp(nn.Module):
             x: input
             weights: weight for each operation
         """
-        return sum(w * op(x) for w, op in zip(weights, self._ops))
+        return sum(w * op(self.bn(x)) for w, op in zip(weights, self._ops))
